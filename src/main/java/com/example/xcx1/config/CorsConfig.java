@@ -20,6 +20,7 @@ public class CorsConfig {
         config.addAllowedOrigin("http://localhost:8080");
         config.addAllowedOrigin("http://localhost:5173");
         config.addAllowedOrigin("http://127.0.0.1:3000");
+        config.addAllowedOrigin("http://127.0.0.1:3001");
         
         // 是否允许发送Cookie
         config.setAllowCredentials(true);
