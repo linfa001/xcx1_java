@@ -17,9 +17,9 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         
         // 允许所有来源，生产环境建议指定具体域名
-        config.addAllowedOrigin("http://localhost:8080");
-        config.addAllowedOrigin("http://localhost:5173");
-        config.addAllowedOrigin("http://127.0.0.1:3000");
+//        config.addAllowedOrigin("http://localhost:8080");
+//        config.addAllowedOrigin("http://localhost:5173");
+//        config.addAllowedOrigin("http://127.0.0.1:3000");
 //        config.addAllowedOrigin("http://127.0.0.1:3001");
         
         // 是否允许发送Cookie
