@@ -20,7 +20,7 @@ public class CorsConfig {
         config.addAllowedOrigin("http://localhost:8080");
         config.addAllowedOrigin("http://localhost:5173");//前端 Vite 的默认端口,若没改配置，它就是 5173
 //        config.addAllowedOrigin("http://127.0.0.1:3000");
-        config.addAllowedOrigin("https://recant-oboe-muppet.ngrok-free.dev/api/category/getAl");
+//        config.addAllowedOrigin("https://recant-oboe-muppet.ngrok-free.dev/api/category/getAl");
 
         
         // 是否允许发送Cookie
@@ -40,8 +40,6 @@ public class CorsConfig {
         config.addAllowedHeader("ngrok-skip-browser-warning");
         config.addAllowedHeader("User-Agent");
 
-
-        config.setAllowCredentials(true);
 
         // 暴露的响应头
         config.addExposedHeader("Content-Disposition");
