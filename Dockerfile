@@ -16,7 +16,7 @@ RUN addgroup --system app && adduser --system --group app
 WORKDIR /app
 
 # 复制构建好的Spring Boot应用到容器并重命名为app.jar
-COPY target/xcx1-0.0.1-SNAPSHOT.jar app.jar
+COPY target/xcx1-1.0.0.jar app.jar
 # 切换到app用户，避免以root权限运行应用
 USER app
 # 声明容器运行时监听的端口号
