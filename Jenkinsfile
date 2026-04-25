@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         APP_NAME     = "xcx1-app"
-        DOCKER_REG  = "docker.io"
-        DOCKER_REPO = "你的dockerhub用户名/xcx1-app"
+//         DOCKER_REG  = "docker.io"
+//         DOCKER_REPO = "你的dockerhub用户名/xcx1-app"
 
         // 自动获取 Git 标签作为版本号
         VERSION = sh(
