@@ -19,7 +19,7 @@ WORKDIR /app
 COPY target/xcx1-1.0.0.jar app.jar
 # 切换到app用户，避免以root权限运行应用
 USER app
-# 声明容器运行时监听的端口号
+# 声明容器运行时监听的端口号（文档说明，可以不写，写了方便执行命令docker ps查询）
 EXPOSE 3001
 
 # 启动时指定端口为 3001
