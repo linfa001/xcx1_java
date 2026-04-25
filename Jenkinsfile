@@ -15,7 +15,7 @@ pipeline {
 
     stages {
 
-        stage('🔍 检出代码') {
+/*         stage('🔍 检出代码') {
             steps {
                 git(
                     url: 'https://github.com/linfa001/xcx1_java.git',
@@ -23,7 +23,7 @@ pipeline {
                     credentialsId: 'dd571900-ed8c-459e-883c-47d6d0539c09'
                 )
             }
-        }
+        } */
 
         stage('☕ Maven 构建') {
             steps {
