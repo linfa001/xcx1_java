@@ -10,13 +10,21 @@
 FROM eclipse-temurin:21-jdk
 # 设置容器时区环境变量
 ENV TZ=Asia/Shanghai
+
+ARG VERSION=unknown
+ENV APP_VERSION=$VERSION
+
 # 创建系统用户组和用户，以非root用户身份运行应用，增强安全性
 RUN addgroup --system app && adduser --system --group app
 # 设置容器内工作目录
 WORKDIR /app
 
 # 复制构建好的Spring Boot应用到容器并重命名为app.jar
-COPY target/xcx1-1.0.0.jar app.jar
+#COPY target/xcx1-1.0.0.jar app.jar
+
+#支持传入版本号
+COPY target/*.jar app.jar
+
 # 切换到app用户，避免以root权限运行应用
 USER app
 # 声明容器运行时监听的端口号（文档说明，可以不写，写了方便执行命令docker ps查询）
