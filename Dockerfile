@@ -6,7 +6,8 @@
 #   - 运行用户：app（系统用户）
 #   - 工作目录：/app
 #   - 服务端口：3001
-FROM openjdk:21-jdk-slim
+#FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk
 # 设置容器时区环境变量
 ENV TZ=Asia/Shanghai
 # 创建系统用户组和用户，以非root用户身份运行应用，增强安全性
