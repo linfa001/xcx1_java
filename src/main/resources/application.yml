@@ -17,7 +17,8 @@ spring:
   # MySQL数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/xcx1_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+#    url: jdbc:mysql://localhost:3306/xcx1_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://host.docker.internal:3306/xcx1_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password:
 
@@ -33,12 +34,18 @@ spring:
         max-wait: 3000
     cluster:
       nodes:
-        - 127.0.0.1:7001
-        - 127.0.0.1:7002
-        - 127.0.0.1:7003
-        - 127.0.0.1:7004
-        - 127.0.0.1:7005
-        - 127.0.0.1:7006
+#        - 127.0.0.1:7001
+#        - 127.0.0.1:7002
+#        - 127.0.0.1:7003
+#        - 127.0.0.1:7004
+#        - 127.0.0.1:7005
+#        - 127.0.0.1:7006
+        - host.docker.internal:7001
+        - host.docker.internal:7002
+        - host.docker.internal:7003
+        - host.docker.internal:7004
+        - host.docker.internal:7005
+        - host.docker.internal:7006
       max-redirects: 3
 
   # Jackson配置
