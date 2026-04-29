@@ -1,11 +1,14 @@
+/*
 package com.example.xcx1.util;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+*/
 /**
  * 密码生成工具
  * 用于生成 BCrypt 加密的密码
- */
+ *//*
+
 public class PasswordGenerator {
 
     public static void main(String[] args) {
@@ -28,3 +31,4 @@ public class PasswordGenerator {
         System.out.println("('user', '" + userPassword + "', 1);");
     }
 }
+*/

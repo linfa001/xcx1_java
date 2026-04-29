@@ -1,3 +1,4 @@
+/*
 package com.example.xcx1.filter;
 
 import lombok.extern.slf4j.Slf4j;
@@ -8,9 +9,11 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
+*/
 /**
  * 请求日志过滤器 - 用于捕获请求阶段的客户端断开异常
- */
+ *//*
+
 @Slf4j
 @Component
 @Order(1)
@@ -50,3 +53,4 @@ public class RequestLoggingFilter implements Filter {
                 || message.contains("ClientAbort");
     }
 }
+*/

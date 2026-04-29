@@ -1,3 +1,4 @@
+/*
 package com.example.xcx1.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -12,10 +13,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
+*/
 /**
  * 自定义用户详情服务
  * 实现UserDetailsService接口，从数据库加载用户信息进行认证
- */
+ *//*
+
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -27,13 +30,15 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    /**
+    */
+/**
      * 根据用户名从数据库加载用户信息
      *
      * @param username 用户名
      * @return UserDetails用户详情对象
      * @throws UsernameNotFoundException 当用户不存在时抛出异常
-     */
+     *//*
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 从数据库查询用户
@@ -58,3 +63,4 @@ public class CustomUserDetailsService implements UserDetailsService {
         );
     }
 }
+*/

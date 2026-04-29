@@ -1,3 +1,4 @@
+/*
 package com.example.xcx1.config;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -23,35 +24,40 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+*/
 /**
  * Spring Security配置类
  * 配置OAuth2 Resource Server和JWT认证
- */
+ *//*
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    /**
+    */
+/**
      * JWT签名密钥，从配置文件读取
-     */
+     *//*
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    /**
+    */
+/**
      * 配置登录接口的安全策略（公开访问，无需认证）
      * 优先级设置为 0，确保优先匹配
      *
      * @param http HttpSecurity对象
      * @return SecurityFilterChain实例
      * @throws Exception 配置异常
-     */
+     *//*
+
     @Bean
     @Order(0)
     public SecurityFilterChain loginSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -68,7 +74,8 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
+    */
+/**
      * 配置安全过滤链
      * 使用OAuth2 Resource Server模式处理JWT认证
      * 排除登录接口
@@ -76,7 +83,8 @@ public class SecurityConfig {
      * @param http HttpSecurity对象
      * @return SecurityFilterChain实例
      * @throws Exception 配置异常
-     */
+     *//*
+
     @Bean
     @Order(1)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -93,37 +101,43 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
+    */
+/**
      * 配置认证管理器
      * 提供 AuthenticationManager Bean 供登录接口使用
      *
      * @param authenticationConfiguration Spring Security认证配置
      * @return AuthenticationManager实例
      * @throws Exception 配置异常
-     */
+     *//*
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    /**
+    */
+/**
      * 配置密码编码器
      * 使用BCrypt强哈希算法加密密码
      *
      * @return PasswordEncoder实例
-     */
+     *//*
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
+    */
+/**
      * 配置JWT认证转换器
      * 将JWT令牌转换为Spring Security认证对象
      * 正确处理 roles claim
      *
      * @return JwtAuthenticationConverter实例
-     */
+     *//*
+
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
@@ -143,13 +157,15 @@ public class SecurityConfig {
         return converter;
     }
 
-    /**
+    */
+/**
      * 配置JWT解码器
      * 用于验证和解析JWT令牌
      * 必须使用与 JwtUtil 相同的密钥生成方式
      *
      * @return JwtDecoder实例
-     */
+     *//*
+
     @Bean
     public JwtDecoder jwtDecoder() {
         // 使用与 JJWT 相同的密钥处理方式
@@ -162,3 +178,4 @@ public class SecurityConfig {
                 .build();
     }
 }
+*/
