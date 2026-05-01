@@ -9,7 +9,7 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
 COPY xcx1-auth/target/xcx1-auth-1.0.0.jar /app/app.jar
 
 # 暴露端口
-EXPOSE 3005
+EXPOSE 3004
 
 # 启动命令（优化随机数生成器，加快启动速度）
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar"]
