@@ -34,3 +34,7 @@ logs/
 *.bak
 *.swp
 *~.nib
+
+# Docker Compose (production secrets)
+.env
+docker-compose.override.yml

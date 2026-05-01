@@ -1,0 +1,99 @@
+server:
+#  address: 0.0.0.0
+  port: 3005
+  tomcat:
+    uri-encoding: UTF-8
+  servlet:
+    context-path: /api
+    encoding:
+      force: true
+      charset: UTF-8
+      enabled: true
+
+spring:
+  application:
+    name: xcx1
+  
+  # 禁用 Spring Security 自动配置
+#  autoconfigure:
+#    exclude:
+#      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+#      - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+  
+  # MySQL数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/xcx1_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:}
+
+  # Redis配置
+
+  redis:
+    timeout: 5000
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: 3000
+    cluster:
+      nodes:
+        - ${REDIS_HOST:localhost}:${REDIS_PORT:6379}
+
+  # Jackson配置
+  jackson:
+    serialization:
+      # 禁止将日期序列化为时间戳
+      write-dates-as-timestamps: false
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+    time-zone: GMT+8
+
+# MyBatis-Plus配置
+mybatis-plus:
+  # mapper XML文件位置
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类扫描路径
+  type-aliases-package: com.example.xcx1.entity
+  configuration:
+    # 驼峰命名转换
+    map-underscore-to-camel-case: true
+    # 打印SQL日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      # 主键策略：自增
+      id-type: auto
+      # 逻辑删除字段
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 日志配置
+logging:
+  level:
+    root: info
+    com.example.xcx1: info
+    # 屏蔽 Tomcat 和 Spring 的客户端断开连接错误日志
+    org.apache.catalina.core.ContainerBase.[Tomcat]: error
+    org.apache.coyote.http11: error
+    org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver: error
+    org.apache.catalina.connector: error
+  charset:
+    console: UTF-8
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
+
+# JWT配置
+jwt:
+  secret: ${JWT_SECRET:defaultSecretKeyForJWTTokensMustBeLongEnough2024}
+  expiration: 3600000
+
+# SSO 通用组件配置
+sso:
+  enable-filter: ${SSO_ENABLE_FILTER:false}
+  secret-key: ${SSO_SECRET_KEY:defaultSecretKeyForJWTTokensMustBeLongEnough2024}
+  login-url: ${SSO_LOGIN_URL:/login}
