@@ -42,14 +42,43 @@ pipeline {
             }
         }
 
-        stage('🐳 Docker Compose 构建并部署') {
+        stage('🐳 Docker 构建并部署') {
             steps {
                 sh '''
-                    echo " 停止旧容器..."
-                    docker compose down || true
+                    echo " 停止并删除旧容器..."
+                    docker rm -f xcx1-auth system-a || true
 
-                    echo " 构建镜像并启动服务..."
-                    docker compose up -d --build
+                    echo " 构建认证中心镜像..."
+                    docker build -t xcx1-auth -f Dockerfile-auth .
+
+                    echo " 构建业务系统镜像..."
+                    docker build -t system-a -f Dockerfile-system-a .
+
+                    echo " 启动认证中心 (端口 3004)..."
+                    docker run -d --name xcx1-auth --restart always \
+                      -p 3004:3004 \
+                      -e MYSQL_HOST=host.docker.internal \
+                      -e MYSQL_PORT=3306 \
+                      -e MYSQL_USER=root \
+                      -e MYSQL_PASSWORD=123456 \
+                      -e REDIS_HOST=host.docker.internal \
+                      -e JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024 \
+                      xcx1-auth
+
+                    echo " 等待认证中心启动..."
+                    sleep 5
+
+                    echo " 启动业务系统 (端口 3005)..."
+                    docker run -d --name system-a --restart always \
+                      -p 3005:3005 \
+                      -e MYSQL_HOST=host.docker.internal \
+                      -e MYSQL_PORT=3306 \
+                      -e MYSQL_USER=root \
+                      -e MYSQL_PASSWORD=123456 \
+                      -e REDIS_HOST=host.docker.internal \
+                      -e SSO_ENABLE_FILTER=true \
+                      -e SSO_SECRET_KEY=defaultSecretKeyForJWTTokensMustBeLongEnough2024 \
+                      system-a
 
                     echo "🧹 清理无用镜像..."
                     docker image prune -f
@@ -85,7 +114,7 @@ pipeline {
             echo "❌ 构建失败，请检查日志"
             // docker compose logs 命令在旧版 Docker 中可能不支持，暂时注释
             // sh 'docker compose logs --tail=100 || true'
-            sh 'docker ps -a || true'  // 改为查看容器状态
+            sh 'docker logs --tail=100 xcx1-auth || true'
         }
         always {
             cleanWs()
