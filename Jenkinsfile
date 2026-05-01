@@ -46,10 +46,10 @@ pipeline {
             steps {
                 sh '''
                     echo " 停止旧容器..."
-                    docker-compose down || true
+                    docker compose down || true
 
                     echo " 构建镜像并启动服务..."
-                    docker-compose up -d --build
+                    docker compose up -d --build
 
                     echo "🧹 清理无用镜像..."
                     docker image prune -f
@@ -83,7 +83,7 @@ pipeline {
         }
         failure {
             echo "❌ 构建失败，请检查日志"
-            sh 'docker-compose logs --tail=100 || true'
+            sh 'docker compose logs --tail=100 || true'
         }
         always {
             cleanWs()
