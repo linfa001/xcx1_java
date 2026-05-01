@@ -1,6 +1,6 @@
 server:
 #  address: 0.0.0.0
-  port: 3005
+  port: 3004
   tomcat:
     uri-encoding: UTF-8
   servlet:
@@ -28,21 +28,23 @@ spring:
     password: ${MYSQL_PASSWORD:}
 
   # Redis配置
-
   redis:
     timeout: 5000
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD:}
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: 3000
     cluster:
       nodes:
-        - ${REDIS_HOST:localhost}:${REDIS_PORT:6379}
+        #        - 127.0.0.1:7001
+        #        - 127.0.0.1:7002
+        #        - 127.0.0.1:7003
+        #        - 127.0.0.1:7004
+        #        - 127.0.0.1:7005
+        #        - 127.0.0.1:7006
+        - host.docker.internal:7001
+        - host.docker.internal:7002
+        - host.docker.internal:7003
+        - host.docker.internal:7004
+        - host.docker.internal:7005
+        - host.docker.internal:7006
+      max-redirects: 3
 
   # Jackson配置
   jackson:

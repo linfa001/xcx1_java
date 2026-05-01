@@ -64,12 +64,12 @@ pipeline {
                     sleep 15
 
                     echo " 检查认证中心状态..."
-                    curl -f http://localhost:3005/api/login/login -X POST \
+                    curl -f http://localhost:3004/api/login/login -X POST \
                       -H "Content-Type: application/json" \
                       -d '{"username":"health","password":"check"}' || echo "认证中心未就绪"
 
                     echo "🔍 检查业务系统状态..."
-                    curl -f http://localhost:3004/api/category/getAll || echo "业务系统未就绪"
+                    curl -f http://localhost:3005/api/category/getAll || echo "业务系统未就绪"
                 '''
             }
         }
@@ -78,8 +78,8 @@ pipeline {
     post {
         success {
             echo "✅ 构建成功，版本：${VERSION}"
-            echo "🌐 认证中心: http://localhost:3005"
-            echo "🌐 业务系统 A: http://localhost:3004"
+            echo "🌐 认证中心: http://localhost:3004"
+            echo "🌐 业务系统 A: http://localhost:3005"
         }
         failure {
             echo "❌ 构建失败，请检查日志"
