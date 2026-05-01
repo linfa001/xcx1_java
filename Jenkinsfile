@@ -83,7 +83,9 @@ pipeline {
         }
         failure {
             echo "❌ 构建失败，请检查日志"
-            sh 'docker compose logs --tail=100 || true'
+            // docker compose logs 命令在旧版 Docker 中可能不支持，暂时注释
+            // sh 'docker compose logs --tail=100 || true'
+            sh 'docker ps -a || true'  // 改为查看容器状态
         }
         always {
             cleanWs()
