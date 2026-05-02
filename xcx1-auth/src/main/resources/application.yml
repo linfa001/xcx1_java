@@ -12,13 +12,13 @@ server:
 
 spring:
   application:
-    name: xcx1
+    name: xcx1-auth
   
-  # 禁用 Spring Security 自动配置
-#  autoconfigure:
-#    exclude:
-#      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-#      - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+  # Nacos 服务注册配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
   
   # MySQL数据库配置
   datasource:

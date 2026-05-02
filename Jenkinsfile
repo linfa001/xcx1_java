@@ -65,6 +65,7 @@ pipeline {
 
                     echo " 启动认证中心 (端口 3004 隐藏)..."
                     docker run -d --name xcx1-auth --network xcx1-network --restart always \
+                      -e NACOS_ADDR=host.docker.internal:8848 \
                       -e MYSQL_HOST=host.docker.internal \
                       -e MYSQL_PORT=3306 \
                       -e MYSQL_USER=root \
@@ -78,6 +79,7 @@ pipeline {
 
                     echo " 启动业务系统 (端口 3005 隐藏)..."
                     docker run -d --name system-a --network xcx1-network --restart always \
+                      -e NACOS_ADDR=host.docker.internal:8848 \
                       -e MYSQL_HOST=host.docker.internal \
                       -e MYSQL_PORT=3306 \
                       -e MYSQL_USER=root \
@@ -90,6 +92,7 @@ pipeline {
                     echo " 启动网关 (只暴露 80 端口)..."
                     docker run -d --name xcx1-gateway --network xcx1-network --restart always \
                       -p 80:80 \
+                      -e NACOS_ADDR=host.docker.internal:8848 \
                       -e JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024 \
                       xcx1-gateway
 
@@ -106,7 +109,7 @@ pipeline {
                     sleep 15
 
                     echo " 检查网关登录接口..."
-                    curl -f http://localhost:80/login/login -X POST \
+                    curl -f http://localhost:80/auth/login/login -X POST \
                       -H "Content-Type: application/json" \
                       -d '{"username":"health","password":"check"}' || echo "网关未就绪"
 

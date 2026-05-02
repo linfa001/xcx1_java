@@ -7,6 +7,7 @@ services:
     container_name: xcx1-auth
     # 不暴露端口，只通过内部网络访问
     environment:
+      - NACOS_ADDR=host.docker.internal:8848
       - MYSQL_HOST=host.docker.internal
       - MYSQL_PORT=3306
       - MYSQL_USER=root
@@ -24,6 +25,7 @@ services:
     container_name: system-a
     # 不暴露端口，只通过内部网络访问
     environment:
+      - NACOS_ADDR=host.docker.internal:8848
       - MYSQL_HOST=host.docker.internal
       - MYSQL_PORT=3306
       - MYSQL_USER=root
@@ -31,9 +33,6 @@ services:
       - REDIS_HOST=host.docker.internal
       - SSO_ENABLE_FILTER=true
       - SSO_SECRET_KEY=defaultSecretKeyForJWTTokensMustBeLongEnough2024
-    depends_on:
-      xcx1-auth:
-        condition: service_started
     networks:
       - sso-network
 
@@ -46,12 +45,8 @@ services:
     ports:
       - "80:80"
     environment:
+      - NACOS_ADDR=host.docker.internal:8848
       - JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
-    depends_on:
-      xcx1-auth:
-        condition: service_started
-      system-a:
-        condition: service_started
     networks:
       - sso-network
 

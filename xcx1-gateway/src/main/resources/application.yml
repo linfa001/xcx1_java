@@ -5,11 +5,21 @@ spring:
   application:
     name: xcx1-gateway
   cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+      config:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        file-extension: yml
     gateway:
+      discovery:
+        locator:
+          enabled: true  # 开启从 Nacos 自动发现服务
+          lower-case-service-id: true
       routes:
         # 认证中心路由 (登录接口)
         - id: auth-route
-          uri: http://xcx1-auth:3004
+          uri: lb://xcx1-auth
           predicates:
             - Path=/auth/login/**
           filters:
@@ -17,7 +27,7 @@ spring:
 
         # 业务系统路由 (其他所有接口)
         - id: system-route
-          uri: http://system-a:3005
+          uri: lb://system-a
           predicates:
             - Path=/api/**
           filters:
