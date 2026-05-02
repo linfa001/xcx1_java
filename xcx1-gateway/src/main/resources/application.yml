@@ -11,7 +11,7 @@ spring:
         - id: auth-route
           uri: http://xcx1-auth:3004
           predicates:
-            - Path=/login/**
+            - Path=/auth/login/**
           filters:
             - AddRequestHeader=X-Gateway-Request, true
 
