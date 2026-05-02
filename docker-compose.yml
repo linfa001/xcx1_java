@@ -1,12 +1,11 @@
 services:
-  # 1. 认证中心 (端口 3005)
+  # 1. 认证中心 (端口 3004 隐藏，只允许网关访问)
   xcx1-auth:
     build:
       context: .
       dockerfile: Dockerfile-auth
     container_name: xcx1-auth
-    ports:
-      - "3004:3004"
+    # 不暴露端口，只通过内部网络访问
     environment:
       - MYSQL_HOST=host.docker.internal
       - MYSQL_PORT=3306
@@ -17,14 +16,13 @@ services:
     networks:
       - sso-network
 
-  # 2. 业务系统 A (端口 3004)
+  # 2. 业务系统 A (端口 3005 隐藏，只允许网关访问)
   system-a:
     build:
       context: .
       dockerfile: Dockerfile-system-a
     container_name: system-a
-    ports:
-      - "3005:3005"
+    # 不暴露端口，只通过内部网络访问
     environment:
       - MYSQL_HOST=host.docker.internal
       - MYSQL_PORT=3306
@@ -35,6 +33,24 @@ services:
       - SSO_SECRET_KEY=defaultSecretKeyForJWTTokensMustBeLongEnough2024
     depends_on:
       xcx1-auth:
+        condition: service_started
+    networks:
+      - sso-network
+
+  # 3. 网关 (唯一暴露的入口，端口 80)
+  xcx1-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile-gateway
+    container_name: xcx1-gateway
+    ports:
+      - "80:80"
+    environment:
+      - JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
+    depends_on:
+      xcx1-auth:
+        condition: service_started
+      system-a:
         condition: service_started
     networks:
       - sso-network

@@ -4,7 +4,7 @@ server:
   tomcat:
     uri-encoding: UTF-8
   servlet:
-    context-path: /api
+    context-path: /auth
     encoding:
       force: true
       charset: UTF-8

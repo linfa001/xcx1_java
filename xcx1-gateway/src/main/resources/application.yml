@@ -1,0 +1,43 @@
+server:
+  port: 80
+
+spring:
+  application:
+    name: xcx1-gateway
+  cloud:
+    gateway:
+      routes:
+        # 认证中心路由 (登录接口)
+        - id: auth-route
+          uri: http://xcx1-auth:3004
+          predicates:
+            - Path=/login/**
+          filters:
+            - AddRequestHeader=X-Gateway-Request, true
+
+        # 业务系统路由 (其他所有接口)
+        - id: system-route
+          uri: http://system-a:3005
+          predicates:
+            - Path=/api/**
+          filters:
+            - AddRequestHeader=X-Gateway-Request, true
+
+      # 全局跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+
+# JWT 配置
+jwt:
+  secret-key: ${JWT_SECRET:defaultSecretKeyForJWTTokensMustBeLongEnough2024}

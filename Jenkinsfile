@@ -17,36 +17,42 @@ pipeline {
 
         stage(' 检出代码') {
             steps {
-                echo '📥 从 Git 仓库拉取代码...'
+                echo ' 从 Git 仓库拉取代码...'
                 checkout scm  // 自动使用当前 Jenkins Job 配置的 Git 仓库
             }
         }
 
-        stage('📦 安装 SSO Common 依赖') {
+        stage(' 安装 SSO Common 依赖') {
             steps {
-                echo '🔨 构建 sso-common 并安装到本地仓库...'
+                echo ' 构建 sso-common 并安装到本地仓库...'
                 sh 'mvn install -pl sso-common -am -DskipTests'
             }
         }
 
-        stage('☕ Maven 构建所有模块') {
+        stage(' Maven 构建所有模块') {
             steps {
                 echo "当前版本号：${VERSION}"
                 sh '''
-                    echo "📦 打包认证中心..."
+                    echo " 打包认证中心..."
                     mvn package -pl xcx1-auth -am -DskipTests
 
                     echo " 打包业务系统 A..."
                     mvn package -pl system-a -am -DskipTests
+
+                    echo " 打包网关..."
+                    mvn package -pl xcx1-gateway -am -DskipTests
                 '''
             }
         }
 
-        stage('🐳 Docker 构建并部署') {
+        stage(' Docker 构建并部署') {
             steps {
                 sh '''
+                    echo " 创建内部网络..."
+                    docker network create xcx1-network || true
+
                     echo " 停止并删除旧容器..."
-                    docker rm -f xcx1-auth system-a || true
+                    docker rm -f xcx1-auth system-a xcx1-gateway || true
 
                     echo " 构建认证中心镜像..."
                     docker build -t xcx1-auth -f Dockerfile-auth .
@@ -54,9 +60,11 @@ pipeline {
                     echo " 构建业务系统镜像..."
                     docker build -t system-a -f Dockerfile-system-a .
 
-                    echo " 启动认证中心 (端口 3004)..."
-                    docker run -d --name xcx1-auth --restart always \
-                      -p 3004:3004 \
+                    echo " 构建网关镜像..."
+                    docker build -t xcx1-gateway -f Dockerfile-gateway .
+
+                    echo " 启动认证中心 (端口 3004 隐藏)..."
+                    docker run -d --name xcx1-auth --network xcx1-network --restart always \
                       -e MYSQL_HOST=host.docker.internal \
                       -e MYSQL_PORT=3306 \
                       -e MYSQL_USER=root \
@@ -68,9 +76,8 @@ pipeline {
                     echo " 等待认证中心启动..."
                     sleep 5
 
-                    echo " 启动业务系统 (端口 3005)..."
-                    docker run -d --name system-a --restart always \
-                      -p 3005:3005 \
+                    echo " 启动业务系统 (端口 3005 隐藏)..."
+                    docker run -d --name system-a --network xcx1-network --restart always \
                       -e MYSQL_HOST=host.docker.internal \
                       -e MYSQL_PORT=3306 \
                       -e MYSQL_USER=root \
@@ -80,25 +87,31 @@ pipeline {
                       -e SSO_SECRET_KEY=defaultSecretKeyForJWTTokensMustBeLongEnough2024 \
                       system-a
 
-                    echo "🧹 清理无用镜像..."
+                    echo " 启动网关 (只暴露 80 端口)..."
+                    docker run -d --name xcx1-gateway --network xcx1-network --restart always \
+                      -p 80:80 \
+                      -e JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024 \
+                      xcx1-gateway
+
+                    echo " 清理无用镜像..."
                     docker image prune -f
                 '''
             }
         }
 
-        stage('✅ 健康检查') {
+        stage(' 健康检查') {
             steps {
                 sh '''
                     echo " 等待服务启动..."
                     sleep 15
 
-                    echo " 检查认证中心状态..."
-                    curl -f http://localhost:3004/api/login/login -X POST \
+                    echo " 检查网关登录接口..."
+                    curl -f http://localhost:80/login/login -X POST \
                       -H "Content-Type: application/json" \
-                      -d '{"username":"health","password":"check"}' || echo "认证中心未就绪"
+                      -d '{"username":"health","password":"check"}' || echo "网关未就绪"
 
-                    echo "🔍 检查业务系统状态..."
-                    curl -f http://localhost:3005/api/category/getAll || echo "业务系统未就绪"
+                    echo " 检查业务系统接口..."
+                    curl -f http://localhost:80/api/category/getAll || echo "业务系统未就绪"
                 '''
             }
         }
@@ -107,8 +120,8 @@ pipeline {
     post {
         success {
             echo "✅ 构建成功，版本：${VERSION}"
-            echo "🌐 认证中心: http://localhost:3004"
-            echo "🌐 业务系统 A: http://localhost:3005"
+            echo " 网关 (唯一入口): http://localhost:80"
+            echo " 后端服务端口已隐藏"
         }
         failure {
             echo "❌ 构建失败，请检查日志"
