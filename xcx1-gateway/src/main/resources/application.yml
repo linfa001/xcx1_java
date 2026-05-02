@@ -21,9 +21,11 @@ spring:
         - id: auth-route
           uri: lb://xcx1-auth
           predicates:
-            - Path=/auth/login/**
+            - Path=/auth/**
           filters:
             - AddRequestHeader=X-Gateway-Request, true
+            # StripPrefix=1 表示去掉 /auth 前缀，因为认证中心自己的 context-path 就是 /auth
+            - StripPrefix=1
 
         # 业务系统路由 (其他所有接口)
         - id: system-route
