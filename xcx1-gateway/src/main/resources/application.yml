@@ -8,48 +8,50 @@ spring:
     nacos:
       discovery:
         server-addr: ${NACOS_ADDR:localhost:8848}
+        # 禁用配置中心，只使用服务发现
       config:
-        server-addr: ${NACOS_ADDR:localhost:8848}
-        file-extension: yml
+        enabled: false
     gateway:
+      # 开启服务发现
       discovery:
         locator:
-          enabled: true  # 开启从 Nacos 自动发现服务
+          enabled: true
           lower-case-service-id: true
       routes:
-        # 认证中心路由 (登录接口)
-        - id: auth-route
+        # 认证中心路由 - 简化配置
+        - id: xcx1-auth
           uri: lb://xcx1-auth
           predicates:
             - Path=/auth/**
           filters:
-            - AddRequestHeader=X-Gateway-Request, true
-            # StripPrefix=1 表示去掉 /auth 前缀，因为认证中心自己的 context-path 就是 /auth
             - StripPrefix=1
-
-        # 业务系统路由 (其他所有接口)
-        - id: system-route
+            
+        # 业务系统路由
+        - id: system-a
           uri: lb://system-a
           predicates:
             - Path=/api/**
           filters:
-            - AddRequestHeader=X-Gateway-Request, true
+            - StripPrefix=1
 
       # 全局跨域配置
       globalcors:
         cors-configurations:
           '[/**]':
             allowedOriginPatterns: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
+            allowedMethods: "*"
             allowedHeaders: "*"
             allowCredentials: true
             maxAge: 3600
 
-# JWT 配置
-jwt:
-  secret-key: ${JWT_SECRET:defaultSecretKeyForJWTTokensMustBeLongEnough2024}
+# 负载均衡配置
+spring.cloud.loadbalancer:
+  ribbon:
+    enabled: false
+
+# 日志配置 - 开启网关调试日志
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.loadbalancer: DEBUG
+    com.alibaba.cloud.nacos: DEBUG
