@@ -29,10 +29,10 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
-        <!-- Servlet API（编译时需要，运行时由业务系统提供） -->
+        <!-- Servlet API (Spring Boot 3.x 使用 Jakarta) -->
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
 

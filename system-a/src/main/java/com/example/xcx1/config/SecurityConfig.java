@@ -13,10 +13,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()
-            .cors().disable()
-            .authorizeRequests()
-            .anyRequest().permitAll(); // 业务系统全放行，把验票交给 sso-common
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.disable())
+            .authorizeHttpRequests(auth -> auth
+                .anyRequest().permitAll() // 业务系统全放行，把验票交给 sso-common
+            );
         return http.build();
     }
 }
