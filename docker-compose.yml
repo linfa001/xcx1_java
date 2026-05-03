@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile-auth
     container_name: xcx1-auth
+    ports:
+      - "3004:3004"
     # 不暴露端口，只通过内部网络访问
     networks:
       - xcx1-network
