@@ -18,13 +18,13 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        # 认证中心路由 - 简化配置
+        # 认证中心路由
         - id: xcx1-auth
           uri: lb://xcx1-auth
           predicates:
-            - Path=/login/**
+            - Path=/auth/**
           filters:
-
+            - StripPrefix=1
             
         # 业务系统路由
         - id: system-a
