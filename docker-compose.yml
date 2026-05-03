@@ -15,7 +15,7 @@ services:
       - MYSQL_HOST=host.docker.internal
       - MYSQL_PORT=3306
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=123456
+      - MYSQL_PASSWORD=
       - REDIS_HOST=host.docker.internal
       - JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
 
@@ -35,7 +35,7 @@ services:
       - MYSQL_HOST=host.docker.internal
       - MYSQL_PORT=3306
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=123456
+      - MYSQL_PASSWORD=
       - REDIS_HOST=host.docker.internal
       - SSO_ENABLE_FILTER=true
       - SSO_SECRET_KEY=defaultSecretKeyForJWTTokensMustBeLongEnough2024

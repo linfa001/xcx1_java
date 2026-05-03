@@ -69,7 +69,7 @@ pipeline {
                       -e MYSQL_HOST=host.docker.internal \
                       -e MYSQL_PORT=3306 \
                       -e MYSQL_USER=root \
-                      -e MYSQL_PASSWORD=123456 \
+                      -e MYSQL_PASSWORD= \
                       -e REDIS_HOST=host.docker.internal \
                       -e JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024 \
                       xcx1-auth
@@ -83,7 +83,7 @@ pipeline {
                       -e MYSQL_HOST=host.docker.internal \
                       -e MYSQL_PORT=3306 \
                       -e MYSQL_USER=root \
-                      -e MYSQL_PASSWORD=123456 \
+                      -e MYSQL_PASSWORD= \
                       -e REDIS_HOST=host.docker.internal \
                       -e SSO_ENABLE_FILTER=true \
                       -e SSO_SECRET_KEY=defaultSecretKeyForJWTTokensMustBeLongEnough2024 \
