@@ -28,7 +28,7 @@ import java.util.List;
 @Component
 public class JwtAuthFilter implements GlobalFilter, Ordered {
 
-    @Value("${jwt.secret-key}")
+    @Value("${jwt.secret}")
     private String secretKey;
 
     // 白名单：不需要鉴权的路径
