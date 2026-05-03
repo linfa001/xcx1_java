@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile-auth
     container_name: xcx1-auth
     # 不暴露端口，只通过内部网络访问
+    networks:
+      - xcx1-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -26,6 +28,8 @@ services:
       dockerfile: Dockerfile-system-a
     container_name: system-a
     # 不暴露端口，只通过内部网络访问
+    networks:
+      - xcx1-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -48,9 +52,16 @@ services:
     container_name: xcx1-gateway
     ports:
       - "80:80"
+    networks:
+      - xcx1-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
       - NACOS_ADDR=host.docker.internal:8848
       - JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
+
+# 定义自定义网络，确保所有服务在同一网络中
+networks:
+  xcx1-network:
+    driver: bridge
 
