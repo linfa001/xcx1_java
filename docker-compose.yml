@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile-auth
     container_name: xcx1-auth
     # 不暴露端口，只通过内部网络访问
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - NACOS_ADDR=host.docker.internal:8848
       # 关键配置：服务注册时使用容器名称作为 IP
@@ -16,8 +18,6 @@ services:
       - MYSQL_PASSWORD=123456
       - REDIS_HOST=host.docker.internal
       - JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
-    networks:
-      - sso-network
 
   # 2. 业务系统 A (端口 3005 隐藏，只允许网关访问)
   system-a:
@@ -26,6 +26,8 @@ services:
       dockerfile: Dockerfile-system-a
     container_name: system-a
     # 不暴露端口，只通过内部网络访问
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - NACOS_ADDR=host.docker.internal:8848
       # 关键配置：服务注册时使用容器名称作为 IP
@@ -37,8 +39,6 @@ services:
       - REDIS_HOST=host.docker.internal
       - SSO_ENABLE_FILTER=true
       - SSO_SECRET_KEY=defaultSecretKeyForJWTTokensMustBeLongEnough2024
-    networks:
-      - sso-network
 
   # 3. 网关 (唯一暴露的入口，端口 80)
   xcx1-gateway:
@@ -48,12 +48,9 @@ services:
     container_name: xcx1-gateway
     ports:
       - "80:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - NACOS_ADDR=host.docker.internal:8848
       - JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
-    networks:
-      - sso-network
 
-networks:
-  sso-network:
-    driver: bridge
