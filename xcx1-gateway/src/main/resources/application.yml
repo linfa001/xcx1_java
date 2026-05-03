@@ -51,7 +51,7 @@ spring.cloud.loadbalancer:
 
 # JWT 配置（必须保留，否则 JwtAuthFilter 无法启动）
 jwt:
-  secret-key: ${JWT_SECRET:defaultSecretKeyForJWTTokensMustBeLongEnough2024}
+  secret: ${JWT_SECRET:defaultSecretKeyForJWTTokensMustBeLongEnough2024}
 
 # 日志配置 - 开启网关调试日志
 logging:
