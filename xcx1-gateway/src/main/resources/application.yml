@@ -15,7 +15,7 @@ spring:
       # 开启服务发现
       discovery:
         locator:
-          enabled: true
+          enabled: false
           lower-case-service-id: true
       routes:
         # 认证中心路由
