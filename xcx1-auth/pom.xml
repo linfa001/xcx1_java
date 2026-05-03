@@ -49,6 +49,15 @@
             <version>${mybatis-plus.version}</version>
         </dependency>
 
+        <!-- 显式引入 mybatis-spring（解决 @MapperScan 注解找不到的问题） -->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+
+        <!-- MyBatis-Plus JSqlParser 已移除,3.5.4.1 不需要 -->
+
         <!-- MySQL Driver -->
         <dependency>
             <groupId>com.mysql</groupId>
