@@ -33,9 +33,4 @@ public class CustomErrorController implements ErrorController {
         // 返回空响应，避免写入错误页面时再次触发客户端断开连接
         return null;
     }
-
-    @Override
-    public String getErrorPath() {
-        return "/error";
-    }
 }
