@@ -22,9 +22,9 @@ spring:
         - id: xcx1-auth
           uri: lb://xcx1-auth
           predicates:
-            - Path=/auth/**
+            - Path=/login/**
           filters:
-            - StripPrefix=1
+
             
         # 业务系统路由
         - id: system-a
