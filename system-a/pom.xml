@@ -29,11 +29,18 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- 你的其他业务依赖（如 MyBatis-Plus, Redis 等） -->
+        <!-- MyBatis-Plus -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>${mybatis-plus.version}</version>
+        </dependency>
+
+        <!-- 显式引入 mybatis-spring（解决 @MapperScan 注解找不到的问题） -->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>3.0.3</version>
         </dependency>
 
         <!-- MyBatis-Plus JSqlParser 已移除,3.5.4.1 不需要 -->
