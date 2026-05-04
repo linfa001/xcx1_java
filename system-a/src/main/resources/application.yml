@@ -26,7 +26,6 @@ spring:
     password: ${MYSQL_PASSWORD:}
 
   # Redis配置
-
   redis:
     timeout: 5000
     cluster:
