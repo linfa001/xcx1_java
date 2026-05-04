@@ -8,11 +8,9 @@ spring:
     nacos:
       discovery:
         server-addr: ${NACOS_ADDR:localhost:8848}
-        # 禁用配置中心，只使用服务发现
       config:
         enabled: false
     gateway:
-      # 开启服务发现
       discovery:
         locator:
           enabled: false
@@ -43,19 +41,16 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
             maxAge: 3600
+  
+  # 默认激活生产环境
+  profiles:
+    active: prod
 
 # 负载均衡配置
 spring.cloud.loadbalancer:
   ribbon:
     enabled: false
 
-# JWT 配置（必须保留，否则 JwtAuthFilter 无法启动）
+# JWT 配置
 jwt:
   secret: ${JWT_SECRET:defaultSecretKeyForJWTTokensMustBeLongEnough2024}
-
-# 日志配置 - 开启网关调试日志
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.cloud.loadbalancer: DEBUG
-    com.alibaba.cloud.nacos: DEBUG

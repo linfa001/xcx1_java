@@ -1,0 +1,13 @@
+# 开发环境配置
+
+# 日志配置 - 开发环境详细日志
+logging:
+  level:
+    root: info
+    org.springframework.cloud.gateway: debug
+    org.springframework.cloud.loadbalancer: debug
+    com.alibaba.cloud.nacos: debug
+  charset:
+    console: UTF-8
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
