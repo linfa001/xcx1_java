@@ -26,23 +26,24 @@ spring:
     password: ${MYSQL_PASSWORD:}
 
   # Redis配置
-  redis:
-    timeout: 5000
-    cluster:
-      nodes:
-        - ${REDIS_HOST:localhost}:7001
-        - ${REDIS_HOST:localhost}:7002
-        - ${REDIS_HOST:localhost}:7003
-        - ${REDIS_HOST:localhost}:7004
-        - ${REDIS_HOST:localhost}:7005
-        - ${REDIS_HOST:localhost}:7006
-      max-redirects: 3
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: -1ms
+  data:
+    redis:
+      timeout: 5000
+      cluster:
+        nodes:
+          - ${REDIS_HOST:localhost}:7001
+          - ${REDIS_HOST:localhost}:7002
+          - ${REDIS_HOST:localhost}:7003
+          - ${REDIS_HOST:localhost}:7004
+          - ${REDIS_HOST:localhost}:7005
+          - ${REDIS_HOST:localhost}:7006
+        max-redirects: 3
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
 
   # Jackson配置
   jackson:
