@@ -63,9 +63,9 @@ pipeline {
             steps {
                 sh """
                     echo " 导入镜像到 k3d 集群..."
-                    k3d image import system-a:${VERSION} -c my-cluster
-                    k3d image import xcx1-auth:${VERSION} -c my-cluster
-                    k3d image import xcx1-gateway:${VERSION} -c my-cluster
+                    docker save system-a:${VERSION} | docker exec -i k3d-my-cluster-server-0 ctr images import -
+                    docker save xcx1-auth:${VERSION} | docker exec -i k3d-my-cluster-server-0 ctr images import -
+                    docker save xcx1-gateway:${VERSION} | docker exec -i k3d-my-cluster-server-0 ctr images import -
                 """
             }
         }
