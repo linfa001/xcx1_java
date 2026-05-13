@@ -48,13 +48,13 @@ pipeline {
             steps {
                 sh """
                     echo " 构建认证中心镜像..."
-                    docker build -t xcx1-auth:${VERSION} -f Dockerfile-auth .
+                    docker build -t xcx1-auth:${VERSION} -f xcx1-auth/Dockerfile-auth .
 
                     echo " 构建业务系统镜像..."
-                    docker build -t system-a:${VERSION} -f Dockerfile-system-a .
+                    docker build -t system-a:${VERSION} -f system-a/Dockerfile-system-a .
 
                     echo " 构建网关镜像..."
-                    docker build -t xcx1-gateway:${VERSION} -f Dockerfile-gateway .
+                    docker build -t xcx1-gateway:${VERSION} -f xcx1-gateway/Dockerfile-gateway .
                 """
             }
         }
