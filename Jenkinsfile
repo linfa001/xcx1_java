@@ -132,7 +132,7 @@ pipeline {
                                 JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
 
                             echo " 等待 Pod 就绪..."
-                            sh "kubectl rollout status deployment/xcx1-gateway --timeout=120s || true"
+                            kubectl rollout status deployment/xcx1-gateway --timeout=120s || true
                         """
 
                         echo "========== 服务 xcx1-gateway 部署完成 (仅暴露80端口) =========="
