@@ -63,9 +63,9 @@ pipeline {
             steps {
                 sh """
                     echo " 导入镜像到 k3d 集群..."
-                    docker save system-a:${VERSION} | docker exec -i k3d-my-cluster-server-0 k3s ctr -n k8s.io images import -
-                    docker save xcx1-auth:${VERSION} | docker exec -i k3d-my-cluster-server-0 k3s ctr -n k8s.io images import -
-                    docker save xcx1-gateway:${VERSION} | docker exec -i k3d-my-cluster-server-0 k3s ctr -n k8s.io images import -
+                    docker save system-a:${VERSION} | docker exec -i k3d-my-cluster-server-0 ctr -n k8s.io images import -
+                    docker save xcx1-auth:${VERSION} | docker exec -i k3d-my-cluster-server-0 ctr -n k8s.io images import -
+                    docker save xcx1-gateway:${VERSION} | docker exec -i k3d-my-cluster-server-0 ctr -n k8s.io images import -
                 """
             }
         }
