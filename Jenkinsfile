@@ -59,6 +59,17 @@ pipeline {
             }
         }
 
+        stage(' 导入镜像到 K8s 集群') {
+            steps {
+                sh """
+                    echo " 导入镜像到 k3d 集群..."
+                    k3d image import system-a:${VERSION} -c my-cluster
+                    k3d image import xcx1-auth:${VERSION} -c my-cluster
+                    k3d image import xcx1-gateway:${VERSION} -c my-cluster
+                """
+            }
+        }
+
         stage(' K8s 部署') {
             steps {
                 script {
