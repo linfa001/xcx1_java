@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xcx1-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: xcx1-gateway
+  template:
+    metadata:
+      labels:
+        app: xcx1-gateway
+    spec:
+      containers:
+        - name: xcx1-gateway
+          image: your-dockerhub-username/xcx1-gateway:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xcx1-gateway-service
+spec:
+  selector:
+    app: xcx1-gateway
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP

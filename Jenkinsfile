@@ -2,15 +2,8 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_NAME = "sso-project"
-        APP_AUTH     = "xcx1-auth"
-        APP_SYSTEM_A = "system-a"
-
-        // 自动获取 Git 标签作为版本号
-        VERSION = sh(
-            script: 'git describe --tags --always 2>/dev/null || echo "latest"',
-            returnStdout: true
-        ).trim()
+        PROJECT_NAME = "xcx1-project"
+        DOCKER_REPO = "your-dockerhub-username"
     }
 
     stages {
@@ -18,7 +11,14 @@ pipeline {
         stage(' 检出代码') {
             steps {
                 echo ' 从 Git 仓库拉取代码...'
-                checkout scm  // 自动使用当前 Jenkins Job 配置的 Git 仓库
+                checkout scm
+                script {
+                    // 自动获取 Git 标签作为版本号
+                    env.VERSION = sh(
+                        script: 'git describe --tags --always 2>/dev/null || echo "latest"',
+                        returnStdout: true
+                    ).trim()
+                }
             }
         }
 
@@ -45,68 +45,125 @@ pipeline {
             }
         }
 
-        stage(' Docker 构建并部署') {
+        stage(' Docker 构建并推送') {
             steps {
-                sh '''
-                    echo " 创建内部网络..."
-                    docker network create xcx1-network || true
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh """
+                            echo \${DOCKER_PASS} | docker login -u \${DOCKER_USER} --password-stdin
 
-                    echo " 停止并删除旧容器..."
-                    docker rm -f xcx1-auth system-a xcx1-gateway || true
+                            echo " 构建认证中心镜像..."
+                            docker build -t ${DOCKER_REPO}/xcx1-auth:${VERSION} -f Dockerfile-auth .
+                            docker push ${DOCKER_REPO}/xcx1-auth:${VERSION}
 
-                    echo " 构建认证中心镜像..."
-                    docker build -t xcx1-auth -f Dockerfile-auth .
+                            echo " 构建业务系统镜像..."
+                            docker build -t ${DOCKER_REPO}/system-a:${VERSION} -f Dockerfile-system-a .
+                            docker push ${DOCKER_REPO}/system-a:${VERSION}
 
-                    echo " 构建业务系统镜像..."
-                    docker build -t system-a -f Dockerfile-system-a .
+                            echo " 构建网关镜像..."
+                            docker build -t ${DOCKER_REPO}/xcx1-gateway:${VERSION} -f Dockerfile-gateway .
+                            docker push ${DOCKER_REPO}/xcx1-gateway:${VERSION}
 
-                    echo " 构建网关镜像..."
-                    docker build -t xcx1-gateway -f Dockerfile-gateway .
+                            docker logout
+                        """
+                    }
+                }
+            }
+        }
 
-                    echo " 启动认证中心 (端口 3004 隐藏)..."
-                    docker run -d --name xcx1-auth --network xcx1-network --restart always \
-                      -e NACOS_ADDR=host.docker.internal:8848 \
-                      -e MYSQL_HOST=host.docker.internal \
-                      -e MYSQL_PORT=3306 \
-                      -e MYSQL_USER=root \
-                      -e MYSQL_PASSWORD= \
-                      -e REDIS_HOST=host.docker.internal \
-                      -e JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024 \
-                      xcx1-auth
+        stage(' K8s 部署') {
+            steps {
+                script {
+                    // 部署认证中心 (端口 3004)
+                    stage('Deploying xcx1-auth') {
+                        echo "========== 开始部署服务: xcx1-auth =========="
 
-                    echo " 等待认证中心启动..."
-                    sleep 5
+                        sh """
+                            echo " 更新 xcx1-auth 镜像版本..."
+                            sed -i 's|your-dockerhub-username/xcx1-auth:latest|${DOCKER_REPO}/xcx1-auth:${VERSION}|g' ./xcx1-auth/k8s-deploy.yaml
 
-                    echo " 启动业务系统 (端口 3005 隐藏)..."
-                    docker run -d --name system-a --network xcx1-network --restart always \
-                      -e NACOS_ADDR=host.docker.internal:8848 \
-                      -e MYSQL_HOST=host.docker.internal \
-                      -e MYSQL_PORT=3306 \
-                      -e MYSQL_USER=root \
-                      -e MYSQL_PASSWORD= \
-                      -e REDIS_HOST=host.docker.internal \
-                      -e SSO_ENABLE_FILTER=true \
-                      -e SSO_SECRET_KEY=defaultSecretKeyForJWTTokensMustBeLongEnough2024 \
-                      system-a
+                            echo " 应用 K8s 部署配置..."
+                            kubectl apply -f ./xcx1-auth/k8s-deploy.yaml
 
-                    echo " 启动网关 (只暴露 80 端口)..."
-                    docker run -d --name xcx1-gateway --network xcx1-network --restart always \
-                      -p 80:80 \
-                      -e NACOS_ADDR=host.docker.internal:8848 \
-                      -e JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024 \
-                      xcx1-gateway
+                            echo " 配置环境变量 (对应原 docker run -e)..."
+                            kubectl set env deployment/xcx1-auth \
+                                NACOS_ADDR=host.docker.internal:8848 \
+                                MYSQL_HOST=host.docker.internal \
+                                MYSQL_PORT=3306 \
+                                MYSQL_USER=root \
+                                REDIS_HOST=host.docker.internal \
+                                JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
+                            kubectl set env deployment/xcx1-auth MYSQL_PASSWORD="" --overwrite
+                        """
 
-                    echo " 清理无用镜像..."
-                    docker image prune -f
-                '''
+                        echo " 等待认证中心启动..."
+                        sh 'sleep 5'
+                        echo "========== 服务 xcx1-auth 部署完成 (端口3004已隐藏) =========="
+                    }
+
+                    // 部署业务系统 (端口 3005)
+                    stage('Deploying system-a') {
+                        echo "========== 开始部署服务: system-a =========="
+
+                        sh """
+                            echo " 更新 system-a 镜像版本..."
+                            sed -i 's|your-dockerhub-username/system-a:latest|${DOCKER_REPO}/system-a:${VERSION}|g' ./system-a/k8s-deploy.yaml
+
+                            echo " 应用 K8s 部署配置..."
+                            kubectl apply -f ./system-a/k8s-deploy.yaml
+
+                            echo " 配置环境变量 (对应原 docker run -e)..."
+                            kubectl set env deployment/system-a \
+                                NACOS_ADDR=host.docker.internal:8848 \
+                                MYSQL_HOST=host.docker.internal \
+                                MYSQL_PORT=3306 \
+                                MYSQL_USER=root \
+                                REDIS_HOST=host.docker.internal \
+                                SSO_ENABLE_FILTER=true \
+                                SSO_SECRET_KEY=defaultSecretKeyForJWTTokensMustBeLongEnough2024
+                            kubectl set env deployment/system-a MYSQL_PASSWORD="" --overwrite
+                        """
+
+                        echo "========== 服务 system-a 部署完成 (端口3005已隐藏) =========="
+                    }
+
+                    // 部署网关 (只暴露 80 端口)
+                    stage('Deploying xcx1-gateway') {
+                        echo "========== 开始部署服务: xcx1-gateway =========="
+
+                        sh """
+                            echo " 更新 xcx1-gateway 镜像版本..."
+                            sed -i 's|your-dockerhub-username/xcx1-gateway:latest|${DOCKER_REPO}/xcx1-gateway:${VERSION}|g' ./xcx1-gateway/k8s-deploy.yaml
+
+                            echo " 应用 K8s 部署配置..."
+                            kubectl apply -f ./xcx1-gateway/k8s-deploy.yaml
+
+                            echo " 配置环境变量 (对应原 docker run -e)..."
+                            kubectl set env deployment/xcx1-gateway \
+                                NACOS_ADDR=host.docker.internal:8848 \
+                                JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
+
+                            echo " 等待 Pod 就绪..."
+                            sh "kubectl rollout status deployment/xcx1-gateway --timeout=120s || true"
+                        """
+
+                        echo "========== 服务 xcx1-gateway 部署完成 (仅暴露80端口) =========="
+                    }
+                }
             }
         }
 
         stage(' 健康检查') {
             steps {
                 sh '''
-                    echo " 等待服务启动..."
+                    echo " 等待 K8s 服务启动..."
                     sleep 15
+
+                    echo " 检查 Pod 状态..."
+                    kubectl get pods
+
+                    echo " 检查 Pod 详细状态..."
+                    kubectl describe pods
 
                     echo " 检查网关登录接口..."
                     curl -f http://localhost:80/auth/login/login -X POST \
@@ -124,13 +181,14 @@ pipeline {
         success {
             echo "✅ 构建成功，版本：${VERSION}"
             echo " 网关 (唯一入口): http://localhost:80"
-            echo " 后端服务端口已隐藏"
+            echo " 后端服务端口已隐藏 (xcx1-auth:3004, system-a:3005)"
         }
         failure {
             echo "❌ 构建失败，请检查日志"
-            // docker compose logs 命令在旧版 Docker 中可能不支持，暂时注释
-            // sh 'docker compose logs --tail=100 || true'
-            sh 'docker logs --tail=100 xcx1-auth || true'
+            sh 'kubectl logs --tail=100 deployment/xcx1-auth || true'
+            sh 'kubectl logs --tail=100 deployment/system-a || true'
+            sh 'kubectl logs --tail=100 deployment/xcx1-gateway || true'
+            sh 'kubectl get pods || true'
         }
         always {
             cleanWs()
