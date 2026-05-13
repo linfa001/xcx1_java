@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: system-a
-          image: your-dockerhub-username/system-a:latest
+          image: system-a:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3005
 ---

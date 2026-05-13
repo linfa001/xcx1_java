@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         PROJECT_NAME = "xcx1-project"
-        DOCKER_REPO = "your-dockerhub-username"
     }
 
     stages {
@@ -45,29 +44,18 @@ pipeline {
             }
         }
 
-        stage(' Docker 构建并推送') {
+        stage(' Docker 构建 (本地镜像)') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh """
-                            echo \${DOCKER_PASS} | docker login -u \${DOCKER_USER} --password-stdin
+                sh """
+                    echo " 构建认证中心镜像..."
+                    docker build -t xcx1-auth:${VERSION} -f Dockerfile-auth .
 
-                            echo " 构建认证中心镜像..."
-                            docker build -t ${DOCKER_REPO}/xcx1-auth:${VERSION} -f Dockerfile-auth .
-                            docker push ${DOCKER_REPO}/xcx1-auth:${VERSION}
+                    echo " 构建业务系统镜像..."
+                    docker build -t system-a:${VERSION} -f Dockerfile-system-a .
 
-                            echo " 构建业务系统镜像..."
-                            docker build -t ${DOCKER_REPO}/system-a:${VERSION} -f Dockerfile-system-a .
-                            docker push ${DOCKER_REPO}/system-a:${VERSION}
-
-                            echo " 构建网关镜像..."
-                            docker build -t ${DOCKER_REPO}/xcx1-gateway:${VERSION} -f Dockerfile-gateway .
-                            docker push ${DOCKER_REPO}/xcx1-gateway:${VERSION}
-
-                            docker logout
-                        """
-                    }
-                }
+                    echo " 构建网关镜像..."
+                    docker build -t xcx1-gateway:${VERSION} -f Dockerfile-gateway .
+                """
             }
         }
 
@@ -80,7 +68,7 @@ pipeline {
 
                         sh """
                             echo " 更新 xcx1-auth 镜像版本..."
-                            sed -i 's|your-dockerhub-username/xcx1-auth:latest|${DOCKER_REPO}/xcx1-auth:${VERSION}|g' ./xcx1-auth/k8s-deploy.yaml
+                            sed -i 's|xcx1-auth:latest|xcx1-auth:${VERSION}|g' ./xcx1-auth/k8s-deploy.yaml
 
                             echo " 应用 K8s 部署配置..."
                             kubectl apply -f ./xcx1-auth/k8s-deploy.yaml
@@ -107,7 +95,7 @@ pipeline {
 
                         sh """
                             echo " 更新 system-a 镜像版本..."
-                            sed -i 's|your-dockerhub-username/system-a:latest|${DOCKER_REPO}/system-a:${VERSION}|g' ./system-a/k8s-deploy.yaml
+                            sed -i 's|system-a:latest|system-a:${VERSION}|g' ./system-a/k8s-deploy.yaml
 
                             echo " 应用 K8s 部署配置..."
                             kubectl apply -f ./system-a/k8s-deploy.yaml
@@ -133,7 +121,7 @@ pipeline {
 
                         sh """
                             echo " 更新 xcx1-gateway 镜像版本..."
-                            sed -i 's|your-dockerhub-username/xcx1-gateway:latest|${DOCKER_REPO}/xcx1-gateway:${VERSION}|g' ./xcx1-gateway/k8s-deploy.yaml
+                            sed -i 's|xcx1-gateway:latest|xcx1-gateway:${VERSION}|g' ./xcx1-gateway/k8s-deploy.yaml
 
                             echo " 应用 K8s 部署配置..."
                             kubectl apply -f ./xcx1-gateway/k8s-deploy.yaml

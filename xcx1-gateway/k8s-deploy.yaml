@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: xcx1-gateway
-          image: your-dockerhub-username/xcx1-gateway:latest
+          image: xcx1-gateway:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
 ---

@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: xcx1-auth
-          image: your-dockerhub-username/xcx1-auth:latest
+          image: xcx1-auth:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3004
 ---
