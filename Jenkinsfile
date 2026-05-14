@@ -138,7 +138,7 @@ pipeline {
 
                         sh """
                             echo " 更新 xcx1-gateway 镜像版本..."
-                            sed -i 's|xcx1-gateway:latest|xcx1-gateway:\${VERSION}|g' ./xcx1-gateway/k8s-deploy.yaml
+                            sed -i 's|xcx1-gateway:latest|xcx1-gateway:${VERSION}|g' ./xcx1-gateway/k8s-deploy.yaml
 
                             echo " 应用 K8s Deployment 和 Service..."
                             kubectl apply -f ./xcx1-gateway/k8s-deploy.yaml
