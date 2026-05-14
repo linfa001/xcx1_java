@@ -144,8 +144,8 @@ pipeline {
                             kubectl apply -f ./xcx1-gateway/k8s-deploy.yaml
 
                             echo " 配置环境变量..."
-                            kubectl set env deployment/xcx1-gateway \\
-                                NACOS_ADDR=host.docker.internal:8848 \\
+                            kubectl set env deployment/xcx1-gateway \
+                                NACOS_ADDR=host.docker.internal:8848 \
                                 JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
 
                             echo " 应用 Ingress 配置 (Traefik 路由)..."
