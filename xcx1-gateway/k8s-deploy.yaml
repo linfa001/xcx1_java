@@ -16,6 +16,9 @@ spec:
     spec:
       hostNetwork: true  # 关键：直接使用宿主机网络
       dnsPolicy: ClusterFirstWithHostNet  # 关键：修复 DNS 解析
+      # 添加节点选择器，确保调度到 master 节点
+      nodeSelector:
+        kubernetes.io/hostname: k3d-my-cluster-server-0
       containers:
         - name: xcx1-gateway
           image: xcx1-gateway:latest

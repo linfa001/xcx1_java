@@ -137,6 +137,15 @@ pipeline {
                         echo "========== 开始部署服务: xcx1-gateway =========="
 
                         sh """
+                            echo "🔍 检查端口 80 占用情况..."
+                            ss -tlnp | grep ':80 ' || echo "端口 80 未被占用"
+                            
+                            echo "🗑️ 清理旧的网关 Pod（如果有）..."
+                            kubectl delete pod -l app=xcx1-gateway --grace-period=5 --timeout=30s || true
+                            
+                            echo "⏳ 等待端口 80 释放..."
+                            sleep 3
+                            
                             echo " 更新 xcx1-gateway 镜像版本..."
                             sed -i 's|xcx1-gateway:latest|xcx1-gateway:${VERSION}|g' ./xcx1-gateway/k8s-deploy.yaml
 
@@ -150,6 +159,9 @@ pipeline {
 
                             echo " 等待新 Pod 启动完成（会有短暂停机）..."
                             kubectl rollout status deployment/xcx1-gateway --timeout=120s
+                            
+                            echo "✅ 验证 Pod 状态..."
+                            kubectl get pods -l app=xcx1-gateway
                         """
 
                         echo "========== 服务 xcx1-gateway 部署完成 (仅暴露80端口) =========="
@@ -211,6 +223,11 @@ pipeline {
             sh 'kubectl logs --tail=100 deployment/xcx1-gateway || true'
             sh 'kubectl get pods || true'
             sh 'kubectl describe pods || true'
+            
+            echo "🔍 特别检查网关 Pod 调度问题:"
+            sh 'kubectl describe pod -l app=xcx1-gateway || true'
+            sh 'kubectl get events --sort-by=.lastTimestamp | tail -20 || true'
+            sh 'ss -tlnp | grep :80 || true'
         }
         always {
             cleanWs()
