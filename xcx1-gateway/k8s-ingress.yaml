@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: xcx1-gateway-ingress
+  annotations:
+    # Traefik 特定配置
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: xcx1-gateway-service
+                port:
+                  number: 80
+    # 也支持通过 IP 访问
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: xcx1-gateway-service
+                port:
+                  number: 80
