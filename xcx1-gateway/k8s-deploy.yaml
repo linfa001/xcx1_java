@@ -12,6 +12,8 @@ spec:
       labels:
         app: xcx1-gateway
     spec:
+      hostNetwork: true  # 关键：直接使用宿主机网络
+      dnsPolicy: ClusterFirstWithHostNet  # 关键：修复 DNS 解析
       containers:
         - name: xcx1-gateway
           image: xcx1-gateway:latest
@@ -31,4 +33,6 @@ spec:
       port: 80
       targetPort: 80
       nodePort: 30080
-  type: NodePort
+  type: ClusterIP
+  # 既然用了 hostNetwork，Service 类型用 ClusterIP 就够了，甚至可以不创建 Service
+  # 因为流量不经过 K8s 的转发，直接打到宿主机网卡了
