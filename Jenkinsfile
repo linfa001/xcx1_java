@@ -162,14 +162,14 @@ pipeline {
                             fi
                             
                             echo " 更新 xcx1-gateway 镜像版本..."
-                            sed -i 's|xcx1-gateway:latest|xcx1-gateway:\${VERSION}|g' ./xcx1-gateway/k8s-deploy.yaml
+                            sed -i 's|xcx1-gateway:latest|xcx1-gateway:${VERSION}|g' ./xcx1-gateway/k8s-deploy.yaml
 
                             echo " 应用 K8s 部署配置 (Recreate策略：先删后建)..."
                             kubectl apply -f ./xcx1-gateway/k8s-deploy.yaml
 
                             echo " 配置环境变量 (对应原 docker run -e)..."
-                            kubectl set env deployment/xcx1-gateway \\
-                                NACOS_ADDR=host.docker.internal:8848 \\
+                            kubectl set env deployment/xcx1-gateway \
+                                NACOS_ADDR=host.docker.internal:8848 \
                                 JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
 
                             echo " 等待新 Pod 启动完成（会有短暂停机）..."
