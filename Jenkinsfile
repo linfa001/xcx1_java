@@ -138,23 +138,38 @@ pipeline {
 
                         sh """
                             echo "🔍 检查端口 80 占用情况..."
-                            ss -tlnp | grep ':80 ' || echo "端口 80 未被占用"
+                            ss -tlnp | grep ':80 ' || echo "✅ 端口 80 未被占用"
                             
-                            echo "🗑️ 清理旧的网关 Pod（如果有）..."
-                            kubectl delete pod -l app=xcx1-gateway --grace-period=5 --timeout=30s || true
+                            echo "🗑️ 强制删除旧的网关 Pod（如果有）..."
+                            kubectl delete pod -l app=xcx1-gateway --force --grace-period=0 2>/dev/null || echo "无旧 Pod 需要删除"
                             
-                            echo "⏳ 等待端口 80 释放..."
-                            sleep 3
+                            echo "⏳ 等待端口 80 完全释放..."
+                            sleep 5
+                            
+                            echo "🔍 再次检查端口 80..."
+                            if ss -tlnp | grep -q ':80 '; then
+                                echo "⚠️ 警告：端口 80 仍被占用！"
+                                echo "占用详情："
+                                ss -tlnp | grep ':80 '
+                                echo "尝试杀死占用进程..."
+                                for pid in \$(ss -tlnp | grep ':80 ' | grep -oP 'pid=\\K[0-9]+'); do
+                                    echo "杀死进程 PID: \$pid"
+                                    kill -9 \$pid 2>/dev/null || true
+                                done
+                                sleep 2
+                            else
+                                echo "✅ 端口 80 已释放"
+                            fi
                             
                             echo " 更新 xcx1-gateway 镜像版本..."
-                            sed -i 's|xcx1-gateway:latest|xcx1-gateway:${VERSION}|g' ./xcx1-gateway/k8s-deploy.yaml
+                            sed -i 's|xcx1-gateway:latest|xcx1-gateway:\${VERSION}|g' ./xcx1-gateway/k8s-deploy.yaml
 
                             echo " 应用 K8s 部署配置 (Recreate策略：先删后建)..."
-                            kubectl apply -f ./xcx1-gateway/k8s-deploy.yaml --record
+                            kubectl apply -f ./xcx1-gateway/k8s-deploy.yaml
 
                             echo " 配置环境变量 (对应原 docker run -e)..."
-                            kubectl set env deployment/xcx1-gateway \
-                                NACOS_ADDR=host.docker.internal:8848 \
+                            kubectl set env deployment/xcx1-gateway \\
+                                NACOS_ADDR=host.docker.internal:8848 \\
                                 JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
 
                             echo " 等待新 Pod 启动完成（会有短暂停机）..."
