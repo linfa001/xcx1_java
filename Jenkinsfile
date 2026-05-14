@@ -81,8 +81,11 @@ pipeline {
                             echo " 更新 xcx1-auth 镜像版本..."
                             sed -i 's|xcx1-auth:latest|xcx1-auth:${VERSION}|g' ./xcx1-auth/k8s-deploy.yaml
 
-                            echo " 应用 K8s 部署配置..."
-                            kubectl apply -f ./xcx1-auth/k8s-deploy.yaml
+                            echo " 应用 K8s 部署配置 (滚动更新)..."
+                            kubectl apply -f ./xcx1-auth/k8s-deploy.yaml --record
+
+                            echo " 等待新 Pod 就绪并替换旧 Pod..."
+                            kubectl rollout status deployment/xcx1-auth --timeout=120s
 
                             echo " 配置环境变量 (对应原 docker run -e)..."
                             kubectl set env deployment/xcx1-auth \
@@ -108,8 +111,11 @@ pipeline {
                             echo " 更新 system-a 镜像版本..."
                             sed -i 's|system-a:latest|system-a:${VERSION}|g' ./system-a/k8s-deploy.yaml
 
-                            echo " 应用 K8s 部署配置..."
-                            kubectl apply -f ./system-a/k8s-deploy.yaml
+                            echo " 应用 K8s 部署配置 (滚动更新)..."
+                            kubectl apply -f ./system-a/k8s-deploy.yaml --record
+
+                            echo " 等待新 Pod 就绪并替换旧 Pod..."
+                            kubectl rollout status deployment/system-a --timeout=120s
 
                             echo " 配置环境变量 (对应原 docker run -e)..."
                             kubectl set env deployment/system-a \
@@ -134,16 +140,16 @@ pipeline {
                             echo " 更新 xcx1-gateway 镜像版本..."
                             sed -i 's|xcx1-gateway:latest|xcx1-gateway:${VERSION}|g' ./xcx1-gateway/k8s-deploy.yaml
 
-                            echo " 应用 K8s 部署配置..."
-                            kubectl apply -f ./xcx1-gateway/k8s-deploy.yaml
+                            echo " 应用 K8s 部署配置 (Recreate策略：先删后建)..."
+                            kubectl apply -f ./xcx1-gateway/k8s-deploy.yaml --record
 
                             echo " 配置环境变量 (对应原 docker run -e)..."
                             kubectl set env deployment/xcx1-gateway \
                                 NACOS_ADDR=host.docker.internal:8848 \
                                 JWT_SECRET=defaultSecretKeyForJWTTokensMustBeLongEnough2024
 
-                            echo " 等待 Pod 就绪..."
-                            kubectl rollout status deployment/xcx1-gateway --timeout=120s || true
+                            echo " 等待新 Pod 启动完成（会有短暂停机）..."
+                            kubectl rollout status deployment/xcx1-gateway --timeout=120s
                         """
 
                         echo "========== 服务 xcx1-gateway 部署完成 (仅暴露80端口) =========="
@@ -179,15 +185,32 @@ pipeline {
     post {
         success {
             echo "✅ 构建成功，版本：${VERSION}"
+            echo "📦 部署策略："
+            echo "  - xcx1-auth/system-a: 滚动更新 (零停机)"
+            echo "  - xcx1-gateway: Recreate (先删后建，因使用hostNetwork)"
             echo " 网关 (唯一入口): http://localhost:80"
             echo " 后端服务端口已隐藏 (xcx1-auth:3004, system-a:3005)"
+            
+            // 显示当前运行的 Pod 信息
+            sh 'kubectl get pods -l app=xcx1-gateway || true'
+            sh 'kubectl get pods -l app=xcx1-auth || true'
+            sh 'kubectl get pods -l app=system-a || true'
         }
         failure {
-            echo "❌ 构建失败，请检查日志"
+            echo "❌ 构建或部署失败，请检查日志"
+            echo "🔄 尝试回滚到上一个稳定版本..."
+            
+            // 自动回滚失败的部署
+            sh 'kubectl rollout undo deployment/xcx1-auth || true'
+            sh 'kubectl rollout undo deployment/system-a || true'
+            sh 'kubectl rollout undo deployment/xcx1-gateway || true'
+            
+            echo "📋 查看失败日志:"
             sh 'kubectl logs --tail=100 deployment/xcx1-auth || true'
             sh 'kubectl logs --tail=100 deployment/system-a || true'
             sh 'kubectl logs --tail=100 deployment/xcx1-gateway || true'
             sh 'kubectl get pods || true'
+            sh 'kubectl describe pods || true'
         }
         always {
             cleanWs()

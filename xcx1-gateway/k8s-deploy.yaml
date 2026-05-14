@@ -4,6 +4,8 @@ metadata:
   name: xcx1-gateway
 spec:
   replicas: 1
+  strategy:
+    type: Recreate  # 先删除旧Pod，再创建新Pod（避免端口冲突）
   selector:
     matchLabels:
       app: xcx1-gateway
