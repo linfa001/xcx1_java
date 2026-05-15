@@ -8,7 +8,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1        # 允许额外创建1个Pod
-      maxUnavailable: 1  # 允许1个Pod不可用（避免死锁）
+      maxUnavailable: 0  # 不允许有Pod不可用(保证零停机)
   selector:
     matchLabels:
       app: xcx1-gateway
