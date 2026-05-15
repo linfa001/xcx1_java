@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: system-b
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # 最多额外创建1个Pod
+      maxUnavailable: 0  # 不允许有Pod不可用(保证零停机)
+  selector:
+    matchLabels:
+      app: system-b
+  template:
+    metadata:
+      labels:
+        app: system-b
+    spec:
+      containers:
+        - name: system-b
+          image: system-b:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3006
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: system-b-service
+spec:
+  selector:
+    app: system-b
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3006
+  type: ClusterIP

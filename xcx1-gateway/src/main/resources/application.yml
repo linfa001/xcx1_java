@@ -24,11 +24,19 @@ spring:
           filters:
             - StripPrefix=1
             
-        # 业务系统路由
+        # 业务系统 A 路由
         - id: system-a
           uri: lb://system-a
           predicates:
             - Path=/api/**
+          filters:
+            - StripPrefix=1
+            
+        # 业务系统 B 路由
+        - id: system-b
+          uri: lb://system-b
+          predicates:
+            - Path=/apib/**
           filters:
             - StripPrefix=1
 

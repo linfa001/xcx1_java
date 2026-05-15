@@ -1,0 +1,55 @@
+server:
+  port: 3006
+  tomcat:
+    uri-encoding: UTF-8
+  servlet:
+    encoding:
+      force: true
+      charset: UTF-8
+      enabled: true
+
+spring:
+  application:
+    name: system-b
+  
+  # Nacos 服务注册配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+  
+  # Jackson配置
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+    time-zone: GMT+8
+  
+  # 默认激活生产环境
+  profiles:
+    active: prod
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.example.xcx1.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# JWT配置
+jwt:
+  secret: ${JWT_SECRET:defaultSecretKeyForJWTTokensMustBeLongEnough2024}
+  expiration: 3600000
+
+# SSO 通用组件配置
+sso:
+  enable-filter: ${SSO_ENABLE_FILTER:true}
+  secret-key: ${SSO_SECRET_KEY:defaultSecretKeyForJWTTokensMustBeLongEnough2024}
+  login-url: ${SSO_LOGIN_URL:/login}

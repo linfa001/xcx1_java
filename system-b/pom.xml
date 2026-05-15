@@ -11,9 +11,9 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>system-a</artifactId>
-    <name>system-a</name>
-    <description>业务系统 A - 负责具体业务逻辑</description>
+    <artifactId>system-b</artifactId>
+    <name>system-b</name>
+    <description>业务系统 B - 负责具体业务逻辑</description>
 
     <dependencies>
         <!-- 引入 SSO 通用组件（自动开启 Token 校验） -->
@@ -42,8 +42,6 @@
             <artifactId>mybatis-spring</artifactId>
             <version>3.0.3</version>
         </dependency>
-
-        <!-- MyBatis-Plus JSqlParser 已移除,3.5.4.1 不需要 -->
 
         <dependency>
             <groupId>com.mysql</groupId>
@@ -78,18 +76,6 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-
-        <!-- OpenFeign 微服务间调用 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-        </dependency>
-
-        <!-- Spring Cloud LoadBalancer（OpenFeign 依赖的负载均衡器） -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
 
         <!-- Hutool 工具类 -->

@@ -38,6 +38,9 @@ pipeline {
                     echo " 打包业务系统 A..."
                     mvn package -pl system-a -am -DskipTests
 
+                    echo " 打包业务系统 B..."
+                    mvn package -pl system-b -am -DskipTests
+
                     echo " 打包网关..."
                     mvn package -pl xcx1-gateway -am -DskipTests
                 '''
@@ -50,8 +53,11 @@ pipeline {
                     echo " 构建认证中心镜像..."
                     docker build -t xcx1-auth:${VERSION} -f xcx1-auth/Dockerfile-auth .
 
-                    echo " 构建业务系统镜像..."
+                    echo " 构建业务系统 A 镜像..."
                     docker build -t system-a:${VERSION} -f system-a/Dockerfile-system-a .
+
+                    echo " 构建业务系统 B 镜像..."
+                    docker build -t system-b:${VERSION} -f system-b/Dockerfile-system-b .
 
                     echo " 构建网关镜像..."
                     docker build -t xcx1-gateway:${VERSION} -f xcx1-gateway/Dockerfile-gateway .
@@ -64,6 +70,7 @@ pipeline {
                 sh """
                     echo " 导入镜像到 k3d 集群..."
                     docker save system-a:${VERSION} | docker exec -i k3d-my-cluster-server-0 ctr -n k8s.io images import -
+                    docker save system-b:${VERSION} | docker exec -i k3d-my-cluster-server-0 ctr -n k8s.io images import -
                     docker save xcx1-auth:${VERSION} | docker exec -i k3d-my-cluster-server-0 ctr -n k8s.io images import -
                     docker save xcx1-gateway:${VERSION} | docker exec -i k3d-my-cluster-server-0 ctr -n k8s.io images import -
                 """
@@ -132,6 +139,35 @@ pipeline {
                         echo "========== 服务 system-a 部署完成 (端口3005已隐藏) =========="
                     }
 
+                    // 部署业务系统 B (端口 3006)
+                    stage('Deploying system-b') {
+                        echo "========== 开始部署服务: system-b =========="
+
+                        sh """
+                            echo " 更新 system-b 镜像版本..."
+                            sed -i 's|system-b:latest|system-b:${VERSION}|g' ./system-b/k8s-deploy.yaml
+
+                            echo " 应用 K8s 部署配置 (滚动更新)..."
+                            kubectl apply -f ./system-b/k8s-deploy.yaml --record
+
+                            echo " 等待新 Pod 就绪并替换旧 Pod..."
+                            kubectl rollout status deployment/system-b --timeout=120s
+
+                            echo " 配置环境变量 (对应原 docker run -e)..."
+                            kubectl set env deployment/system-b \
+                                NACOS_ADDR=host.docker.internal:8848 \
+                                MYSQL_HOST=host.docker.internal \
+                                MYSQL_PORT=3306 \
+                                MYSQL_USER=root \
+                                REDIS_HOST=host.docker.internal \
+                                SSO_ENABLE_FILTER=true \
+                                SSO_SECRET_KEY=defaultSecretKeyForJWTTokensMustBeLongEnough2024
+                            kubectl set env deployment/system-b MYSQL_PASSWORD="" --overwrite
+                        """
+
+                        echo "========== 服务 system-b 部署完成 (端口3006已隐藏) =========="
+                    }
+
                     // 部署网关 (通过 Ingress 暴露)
                     stage('Deploying xcx1-gateway') {
                         echo "========== 开始部署服务: xcx1-gateway =========="
@@ -187,6 +223,9 @@ pipeline {
 
                     echo " 检查业务系统接口..."
                     curl -f http://localhost:80/api/category/getAll || echo "业务系统未就绪"
+
+                    echo " 检查业务系统 B 接口..."
+                    curl -f http://localhost:80/apib/category/getAll || echo "业务系统 B 未就绪"
                 '''
             }
         }
@@ -196,15 +235,16 @@ pipeline {
         success {
             echo "✅ 构建成功，版本：${VERSION}"
             echo "📦 部署策略："
-            echo "  - xcx1-auth/system-a: 滚动更新 (零停机)"
-            echo "  - xcx1-gateway: Recreate (先删后建，因使用hostNetwork)"
+            echo "  - xcx1-auth/system-a/system-b: 滚动更新 (零停机)"
+            echo "  - xcx1-gateway: 滚动更新 (零停机)"
             echo " 网关 (唯一入口): http://localhost:80"
-            echo " 后端服务端口已隐藏 (xcx1-auth:3004, system-a:3005)"
+            echo " 后端服务端口已隐藏 (xcx1-auth:3004, system-a:3005, system-b:3006)"
             
             // 显示当前运行的 Pod 信息
             sh 'kubectl get pods -l app=xcx1-gateway || true'
             sh 'kubectl get pods -l app=xcx1-auth || true'
             sh 'kubectl get pods -l app=system-a || true'
+            sh 'kubectl get pods -l app=system-b || true'
         }
         failure {
             echo "❌ 构建或部署失败，请检查日志"
@@ -213,11 +253,13 @@ pipeline {
             // 自动回滚失败的部署
             sh 'kubectl rollout undo deployment/xcx1-auth || true'
             sh 'kubectl rollout undo deployment/system-a || true'
+            sh 'kubectl rollout undo deployment/system-b || true'
             sh 'kubectl rollout undo deployment/xcx1-gateway || true'
             
             echo "📋 查看失败日志:"
             sh 'kubectl logs --tail=100 deployment/xcx1-auth || true'
             sh 'kubectl logs --tail=100 deployment/system-a || true'
+            sh 'kubectl logs --tail=100 deployment/system-b || true'
             sh 'kubectl logs --tail=100 deployment/xcx1-gateway || true'
             sh 'kubectl get pods || true'
             sh 'kubectl describe pods || true'

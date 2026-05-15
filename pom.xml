@@ -26,6 +26,7 @@
         <module>sso-common</module>
         <module>xcx1-auth</module>
         <module>system-a</module>
+        <module>system-b</module>
         <module>xcx1-gateway</module>
     </modules>
 

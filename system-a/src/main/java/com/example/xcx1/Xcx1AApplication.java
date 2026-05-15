@@ -4,6 +4,7 @@ import com.example.sso.config.SsoAutoConfiguration;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -12,10 +13,11 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication
 @MapperScan("com.example.xcx1.mapper")
 @Import(SsoAutoConfiguration.class)
-public class Xcx1Application {
+@EnableFeignClients
+public class Xcx1AApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Xcx1Application.class, args);
+        SpringApplication.run(Xcx1AApplication.class, args);
         System.out.println("===========================================");
         System.out.println("   Spring Boot Application Started!");
         System.out.println("===========================================");
