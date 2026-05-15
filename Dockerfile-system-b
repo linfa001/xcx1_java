@@ -1,15 +1,16 @@
-# Multi-stage build for system-b
-FROM maven:3.9-eclipse-temurin-21 AS builder
+FROM eclipse-temurin:21-jdk
+LABEL maintainer="sso-project"
 
-WORKDIR /app
-COPY . .
-RUN mvn clean package -pl system-b -am -DskipTests
+# 设置时区（解决容器内时间差8小时问题）
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
 
-FROM eclipse-temurin:21-jre
+# 复制业务系统构建好的 Jar 包
+COPY system-a/target/system-b-1.0.0.jar /app/app.jar
 
-WORKDIR /app
-COPY --from=builder /app/system-b/target/system-b-1.0.0.jar app.jar
-
+# 暴露端口
 EXPOSE 3006
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# 启动命令（优化随机数生成器，加快启动速度）
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar"]
+
