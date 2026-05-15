@@ -110,7 +110,7 @@ pipeline {
                         echo "========== 服务 xcx1-auth 部署完成 (端口3004已隐藏) =========="
                     }
 
-                    // 部署业务系统 (端口 3005)
+                    // 部署业务系统 A (端口 3005)
                     stage('Deploying system-a') {
                         echo "========== 开始部署服务: system-a =========="
 
@@ -221,8 +221,8 @@ pipeline {
                       -H "Content-Type: application/json" \
                       -d '{"username":"health","password":"check"}' || echo "网关未就绪"
 
-                    echo " 检查业务系统接口..."
-                    curl -f http://localhost:80/api/category/getAll || echo "业务系统未就绪"
+                    echo " 检查业务系统 A 接口..."
+                    curl -f http://localhost:80/api/category/getAll || echo "业务系统 A 未就绪"
 
                     echo " 检查业务系统 B 接口..."
                     curl -f http://localhost:80/apib/category/getAll || echo "业务系统 B 未就绪"
