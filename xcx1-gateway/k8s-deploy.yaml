@@ -7,8 +7,8 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+      maxSurge: 1        # 允许额外创建1个Pod
+      maxUnavailable: 1  # 允许1个Pod不可用（避免死锁）
   selector:
     matchLabels:
       app: xcx1-gateway
@@ -27,10 +27,10 @@ spec:
             httpGet:
               path: /actuator/health
               port: 80
-            initialDelaySeconds: 20  # 增加到20秒，给应用足够启动时间
-            periodSeconds: 5
-            timeoutSeconds: 3
-            failureThreshold: 6
+            initialDelaySeconds: 15  # 应用启动后15秒开始检查
+            periodSeconds: 5         # 每5秒检查一次
+            timeoutSeconds: 3        # 超时3秒
+            failureThreshold: 3      # 连续失败3次才标记为不健康
           livenessProbe:
             httpGet:
               path: /actuator/health
@@ -52,5 +52,3 @@ spec:
       port: 80
       targetPort: 80
   type: ClusterIP
-  # 既然用了 hostNetwork，Service 类型用 ClusterIP 就够了，甚至可以不创建 Service
-  # 因为流量不经过 K8s 的转发，直接打到宿主机网卡了
