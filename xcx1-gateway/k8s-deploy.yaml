@@ -27,14 +27,18 @@ spec:
             httpGet:
               path: /actuator/health
               port: 80
-            initialDelaySeconds: 10
+            initialDelaySeconds: 20  # 增加到20秒，给应用足够启动时间
             periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /actuator/health
               port: 80
-            initialDelaySeconds: 30
+            initialDelaySeconds: 40  # 增加到40秒
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
 ---
 apiVersion: v1
 kind: Service

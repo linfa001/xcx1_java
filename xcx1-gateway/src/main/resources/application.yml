@@ -54,3 +54,16 @@ spring.cloud.loadbalancer:
 # JWT 配置
 jwt:
   secret: ${JWT_SECRET:defaultSecretKeyForJWTTokensMustBeLongEnough2024}
+
+# Actuator 健康检查配置
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  health:
+    defaults:
+      enabled: true
