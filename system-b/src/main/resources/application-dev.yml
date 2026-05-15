@@ -1,0 +1,37 @@
+# 开发环境配置
+
+spring:
+  # MySQL数据库配置 - 开发环境
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/xcx1_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:}
+
+  # Redis配置 - 开发环境使用单机模式
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      timeout: 5000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+# 日志配置 - 开发环境详细日志
+logging:
+  level:
+    root: info
+    com.example.xcx1: debug
+    org.apache.catalina.core.ContainerBase.[Tomcat]: error
+    org.apache.coyote.http11: error
+    org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver: error
+    org.apache.catalina.connector: error
+  charset:
+    console: UTF-8
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n'
