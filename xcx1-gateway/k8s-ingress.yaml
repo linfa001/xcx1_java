@@ -8,8 +8,9 @@ metadata:
     kubernetes.io/ingress.class: traefik
 spec:
   rules:
-    - host: localhost
-      http:
+#    - host: localhost
+#      http:  把 host: localhost这一行删除了。这样配置后，Ingress（网关）就不再检查“口令”（域名）
+    - http:
         paths:
           - path: /
             pathType: Prefix
